@@ -132,7 +132,7 @@ class GRU4RECModel(BaseModel):
         embedded = self.item_embeddings(input_ids)  # (batch, seq_len, hidden_size)
         input_len = [len_ if len_ > 0 else 1 for len_ in input_len]
         embedded = pack_padded_sequence(
-            embedded, input_len, enforce_sorted=False,
+            embedded, input_len.to('cpu'), enforce_sorted=False,
             batch_first=True)  # (num_layers , batch, hidden_size)
 
         output, hidden = self.gru(embedded)

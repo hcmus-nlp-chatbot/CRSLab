@@ -103,15 +103,15 @@ class MGCGModel(BaseModel):
         user_profile = self.embeddings(user_profile)
 
         context = pack_padded_sequence(context,
-                                       len_context,
+                                       len_context.to('cpu'),
                                        enforce_sorted=False,
                                        batch_first=True)
         topic_path_kw = pack_padded_sequence(topic_path_kw,
-                                             len_tp,
+                                             len_tp.to('cpu'),
                                              enforce_sorted=False,
                                              batch_first=True)
         user_profile = pack_padded_sequence(user_profile,
-                                            len_profile,
+                                            len_profile.to('cpu'),
                                             enforce_sorted=False,
                                             batch_first=True)
 
