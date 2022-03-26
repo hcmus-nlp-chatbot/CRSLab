@@ -317,7 +317,7 @@ class TGReDialSystem(BaseSystem):
             if hasattr(self, 'conv_model'):
                 conv_input = self.process_input(input_text, 'conv')
                 preds = self.conv_model.forward(conv_input, 'infer').tolist()[0]
-                print(f'Prediction: {str(preds)}')
+                # print(f'Prediction: {str(preds)}')
                 p_str = ind2txt(preds, self.ind2tok, self.end_token_idx)
 
                 token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(p_str, 'conv')
@@ -344,7 +344,7 @@ class TGReDialSystem(BaseSystem):
             data = dataloader.conv_interact(data)
 
         data = [ele.to(self.device) if isinstance(ele, torch.Tensor) else ele for ele in data]
-        print(f'Processed input: {str(data)}')
+        # print(f'Processed input: {str(data)}')
         return data
 
     def convert_to_id(self, text, stage):
@@ -369,7 +369,7 @@ class TGReDialSystem(BaseSystem):
         print(f'Token ids: {str(token_ids)}')
         entity_ids = [self.vocab[stage]['entity2id'][entity] for entity in entities if
                       entity in self.vocab[stage]['entity2id']]
-        print(f'Token ids: {str(entity_ids)}')
+        print(f'Entity ids: {str(entity_ids)}')
         movie_ids = [entity_id for entity_id in entity_ids if entity_id in self.item_ids]
         print(f'Movie ids: {str(movie_ids)}')
         word_ids = [self.vocab[stage]['word2id'][word] for word in words if word in self.vocab[stage]['word2id']]
