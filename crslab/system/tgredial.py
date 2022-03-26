@@ -295,28 +295,29 @@ class TGReDialSystem(BaseSystem):
         self.init_interact()
         input_text = self.get_input(self.language)
         while not self.finished:
-            # rec
-            if hasattr(self, 'rec_model'):
-                rec_input = self.process_input(input_text, 'rec')
-                scores = self.rec_model.forward(rec_input, 'infer')
+            # # rec
+            # if hasattr(self, 'rec_model'):
+            #     rec_input = self.process_input(input_text, 'rec')
+            #     scores = self.rec_model.forward(rec_input, 'infer')
 
-                scores = scores.cpu()[0]
-                scores = scores[self.item_ids]
-                _, rank = torch.topk(scores, 10, dim=-1)
-                item_ids = []
-                for r in rank.tolist():
-                    item_ids.append(self.item_ids[r])
-                first_item_id = item_ids[:1]
-                self.update_context('rec', entity_ids=first_item_id, item_ids=first_item_id)
+            #     scores = scores.cpu()[0]
+            #     scores = scores[self.item_ids]
+            #     _, rank = torch.topk(scores, 10, dim=-1)
+            #     item_ids = []
+            #     for r in rank.tolist():
+            #         item_ids.append(self.item_ids[r])
+            #     first_item_id = item_ids[:1]
+            #     self.update_context('rec', entity_ids=first_item_id, item_ids=first_item_id)
 
-                print(f"[Recommend]:")
-                for item_id in item_ids:
-                    if item_id in self.id2entity:
-                        print(self.id2entity[item_id])
+            #     print(f"[Recommend]:")
+            #     for item_id in item_ids:
+            #         if item_id in self.id2entity:
+            #             print(self.id2entity[item_id])
             # conv
             if hasattr(self, 'conv_model'):
                 conv_input = self.process_input(input_text, 'conv')
                 preds = self.conv_model.forward(conv_input, 'infer').tolist()[0]
+                print(f'Prediction: {str(preds)}')
                 p_str = ind2txt(preds, self.ind2tok, self.end_token_idx)
 
                 token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(p_str, 'conv')
@@ -343,6 +344,7 @@ class TGReDialSystem(BaseSystem):
             data = dataloader.conv_interact(data)
 
         data = [ele.to(self.device) if isinstance(ele, torch.Tensor) else ele for ele in data]
+        print(f'Processed input: {str(data)}')
         return data
 
     def convert_to_id(self, text, stage):
@@ -354,7 +356,9 @@ class TGReDialSystem(BaseSystem):
             raise
 
         entities = self.link(tokens, self.side_data[stage]['entity_kg']['entity'])
+        print(f'Linked entities: {str(entities)}')
         words = self.link(tokens, self.side_data[stage]['word_kg']['entity'])
+        print(f'Linked words: {str(words)}')
 
         if self.opt['tokenize'][stage] in ('gpt2', 'bert'):
             language = dataset_language_map[self.opt['dataset']]
@@ -362,9 +366,13 @@ class TGReDialSystem(BaseSystem):
             tokens = self.tokenize(text, 'bert', path)
 
         token_ids = [self.vocab[stage]['tok2ind'].get(token, self.vocab[stage]['unk']) for token in tokens]
+        print(f'Token ids: {str(token_ids)}')
         entity_ids = [self.vocab[stage]['entity2id'][entity] for entity in entities if
                       entity in self.vocab[stage]['entity2id']]
+        print(f'Token ids: {str(entity_ids)}')
         movie_ids = [entity_id for entity_id in entity_ids if entity_id in self.item_ids]
+        print(f'Movie ids: {str(movie_ids)}')
         word_ids = [self.vocab[stage]['word2id'][word] for word in words if word in self.vocab[stage]['word2id']]
+        print(f'Word ids: {str(word_ids)}')
 
         return token_ids, entity_ids, movie_ids, word_ids
