@@ -348,12 +348,24 @@ class TGReDialSystem(BaseSystem):
         return data
 
     def convert_to_id(self, text, stage):
-        if self.language == 'zh':
-            tokens = self.tokenize(text, 'pkuseg')
-        elif self.language == 'en':
-            tokens = self.tokenize(text, 'nltk')
-        else:
-            raise
+        # if self.language == 'zh':
+        #     tokens = self.tokenize(text, 'pkuseg')
+        # elif self.language == 'en':
+        #     # tokens = self.tokenize(text, 'nltk')
+        #     tokens = self.tokenize(text, 'bert')
+        # else:
+        #     raise
+
+        if self.opt['tokenize'][stage] in ('bert'):
+            language = dataset_language_map[self.opt['dataset']]
+            path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
+            tokens = self.tokenize(text, 'bert', path)
+        elif self.opt['tokenize'][stage] in ('gpt2'):
+            language = dataset_language_map[self.opt['dataset']]
+            path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
+            tokens = self.tokenize(text, 'gpt2', path)
+
+        print(f'Extracted tokens: {str(tokens)}')
 
         entities = self.link(tokens, self.side_data[stage]['entity_kg']['entity'])
         print(f'Linked entities: {str(entities)}')
@@ -366,13 +378,9 @@ class TGReDialSystem(BaseSystem):
             tokens = self.tokenize(text, 'bert', path)
 
         token_ids = [self.vocab[stage]['tok2ind'].get(token, self.vocab[stage]['unk']) for token in tokens]
-        print(f'Token ids: {str(token_ids)}')
         entity_ids = [self.vocab[stage]['entity2id'][entity] for entity in entities if
                       entity in self.vocab[stage]['entity2id']]
-        print(f'Entity ids: {str(entity_ids)}')
         movie_ids = [entity_id for entity_id in entity_ids if entity_id in self.item_ids]
-        print(f'Movie ids: {str(movie_ids)}')
         word_ids = [self.vocab[stage]['word2id'][word] for word in words if word in self.vocab[stage]['word2id']]
-        print(f'Word ids: {str(word_ids)}')
 
         return token_ids, entity_ids, movie_ids, word_ids
