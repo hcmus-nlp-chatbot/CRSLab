@@ -296,23 +296,23 @@ class TGReDialSystem(BaseSystem):
         input_text = self.get_input(self.language)
         while not self.finished:
             # # rec
-            # if hasattr(self, 'rec_model'):
-            #     rec_input = self.process_input(input_text, 'rec')
-            #     scores = self.rec_model.forward(rec_input, 'infer')
+            if hasattr(self, 'rec_model'):
+                rec_input = self.process_input(input_text, 'rec')
+                scores = self.rec_model.forward(rec_input, 'infer')
 
-            #     scores = scores.cpu()[0]
-            #     scores = scores[self.item_ids]
-            #     _, rank = torch.topk(scores, 10, dim=-1)
-            #     item_ids = []
-            #     for r in rank.tolist():
-            #         item_ids.append(self.item_ids[r])
-            #     first_item_id = item_ids[:1]
-            #     self.update_context('rec', entity_ids=first_item_id, item_ids=first_item_id)
+                scores = scores.cpu()[0]
+                scores = scores[self.item_ids]
+                _, rank = torch.topk(scores, 10, dim=-1)
+                item_ids = []
+                for r in rank.tolist():
+                    item_ids.append(self.item_ids[r])
+                first_item_id = item_ids[:1]
+                self.update_context('rec', entity_ids=first_item_id, item_ids=first_item_id)
 
-            #     print(f"[Recommend]:")
-            #     for item_id in item_ids:
-            #         if item_id in self.id2entity:
-            #             print(self.id2entity[item_id])
+                print(f"[Recommend]:")
+                for item_id in item_ids:
+                    if item_id in self.id2entity:
+                        print(self.id2entity[item_id])
             # conv
             if hasattr(self, 'conv_model'):
                 conv_input = self.process_input(input_text, 'conv')
