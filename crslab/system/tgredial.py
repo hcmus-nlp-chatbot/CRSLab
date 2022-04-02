@@ -299,10 +299,15 @@ class TGReDialSystem(BaseSystem):
             if hasattr(self, 'rec_model'):
                 print('---RECOMMENDATION START---')
                 rec_input = self.process_input(input_text, 'rec')
+                print("processed recommendation input")
                 scores = self.rec_model.forward(rec_input, 'infer')
+                print("done inteference")
+                print(f"scores are {str(scores)}")
 
                 scores = scores.cpu()[0]
+                print(f"extracted scores are {str(scores)}")
                 scores = scores[self.item_ids]
+                print(f"mapped scores are {str(scores)}")
                 _, rank = torch.topk(scores, 10, dim=-1)
                 item_ids = []
                 for r in rank.tolist():
@@ -319,10 +324,10 @@ class TGReDialSystem(BaseSystem):
             if hasattr(self, 'conv_model'):
                 print("---CONVERSATION START---")
                 conv_input = self.process_input(input_text, 'conv')
+                print("processed conversation input")
                 preds = self.conv_model.forward(conv_input, 'infer').tolist()[0]
-                # print(f'Prediction: {str(preds)}')
+                print(f'Prediction: {str(preds)}')
                 p_str = ind2txt(preds, self.ind2tok, self.end_token_idx)
-
                 token_ids, entity_ids, movie_ids, word_ids = self.convert_to_id(p_str, 'conv')
                 self.update_context('conv', token_ids, entity_ids, movie_ids, word_ids)
 
@@ -366,10 +371,10 @@ class TGReDialSystem(BaseSystem):
             path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
             tokens = self.tokenize(text, 'bert', path)
         elif self.opt['tokenize'][stage] in ('gpt2'):
-            print('using GPT2')
+            print('using GPT2 but tokenize with bert')
             language = dataset_language_map[self.opt['dataset']]
             path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
-            tokens = self.tokenize(text, 'gpt2', path)
+            tokens = self.tokenize(text, 'bert', path)
 
         print(f'Extracted tokens: {str(tokens)}')
 
