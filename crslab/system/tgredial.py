@@ -357,10 +357,12 @@ class TGReDialSystem(BaseSystem):
         #     raise
 
         if self.opt['tokenize'][stage] in ('bert'):
+            print('using BERT')
             language = dataset_language_map[self.opt['dataset']]
             path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
             tokens = self.tokenize(text, 'bert', path)
         elif self.opt['tokenize'][stage] in ('gpt2'):
+            print('using GPT2')
             language = dataset_language_map[self.opt['dataset']]
             path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
             tokens = self.tokenize(text, 'gpt2', path)
@@ -372,10 +374,10 @@ class TGReDialSystem(BaseSystem):
         words = self.link(tokens, self.side_data[stage]['word_kg']['entity'])
         print(f'Linked words: {str(words)}')
 
-        if self.opt['tokenize'][stage] in ('gpt2', 'bert'):
-            language = dataset_language_map[self.opt['dataset']]
-            path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
-            tokens = self.tokenize(text, 'bert', path)
+        # if self.opt['tokenize'][stage] in ('gpt2', 'bert'):
+        #     language = dataset_language_map[self.opt['dataset']]
+        #     path = os.path.join(PRETRAIN_PATH, self.opt['tokenize'][stage], language)
+        #     tokens = self.tokenize(text, 'bert', path)
 
         token_ids = [self.vocab[stage]['tok2ind'].get(token, self.vocab[stage]['unk']) for token in tokens]
         entity_ids = [self.vocab[stage]['entity2id'][entity] for entity in entities if
