@@ -295,8 +295,9 @@ class TGReDialSystem(BaseSystem):
         self.init_interact()
         input_text = self.get_input(self.language)
         while not self.finished:
-            # # rec
+            # rec
             if hasattr(self, 'rec_model'):
+                print('---RECOMMENDATION START---')
                 rec_input = self.process_input(input_text, 'rec')
                 scores = self.rec_model.forward(rec_input, 'infer')
 
@@ -313,8 +314,10 @@ class TGReDialSystem(BaseSystem):
                 for item_id in item_ids:
                     if item_id in self.id2entity:
                         print(self.id2entity[item_id])
+                print("---RECOMMENDATION END")
             # conv
             if hasattr(self, 'conv_model'):
+                print("---CONVERSATION START---")
                 conv_input = self.process_input(input_text, 'conv')
                 preds = self.conv_model.forward(conv_input, 'infer').tolist()[0]
                 # print(f'Prediction: {str(preds)}')
@@ -324,6 +327,7 @@ class TGReDialSystem(BaseSystem):
                 self.update_context('conv', token_ids, entity_ids, movie_ids, word_ids)
 
                 print(f"[Response]:\n{p_str}")
+                print("---CONVERSATION END---")
             # input
             input_text = self.get_input(self.language)
 
